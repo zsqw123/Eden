@@ -1,0 +1,7 @@
+/eden-ide/build/
+/sample/build/
+/build/
+
+.gradle
+.idea
+local.properties

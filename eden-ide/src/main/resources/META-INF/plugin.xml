@@ -1,0 +1,19 @@
+<idea-plugin>
+    <id>com.zsu.eden.idea</id>
+    <name>Eden-IDEA</name>
+    <idea-version since-build="201.6858.69"/>
+    <version>1.5.2.1</version>
+    <vendor email="i@bytedance.host" url="https://bytedance.host/">zsu</vendor>
+
+    <description><![CDATA[
+    Eden Lint IDEA Plugin.<br/>
+    Eden Lint IDEA Plugin.<br/>
+    ]]></description>
+
+    <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.java</depends>
+    <depends>org.jetbrains.kotlin</depends>
+</idea-plugin>

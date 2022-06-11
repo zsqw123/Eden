@@ -1,0 +1,39 @@
+<idea-plugin>
+    <id>com.zsu.eden.idea.sample</id>
+    <name>Eden-IDEA</name>
+    <idea-version since-build="201.6858.69"/>
+    <version>1.5.2.1</version>
+    <vendor email="i@bytedance.host" url="https://bytedance.host/">zsu</vendor>
+
+    <description><![CDATA[
+    Eden Lint IDEA Plugin.<br>
+    Eden Lint IDEA Plugin.<br>
+    ]]></description>
+
+    <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.java</depends>
+    <depends>org.jetbrains.kotlin</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+<!--        <resolveScopeEnlarger implementation="com.zsu.eden.sample.MowoScopeEnlarger"/>-->
+        <psi.treeChangeListener implementation="com.zsu.eden.sample.FakeChangeListener"/>
+        <java.shortNamesCache implementation="com.zsu.eden.sample.FakeShortNameCache"/>
+        <java.elementFinder implementation="com.zsu.eden.sample.FakeClassFinder"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.intellij.java">
+        <!-- java extension-->
+    </extensions>
+
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+<!--        <resolveScopeEnlarger implementation="com.zsu.eden.sample.MowoKotlinScopeEnlarger"/>-->
+        <!-- kotlin extension-->
+    </extensions>
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+</idea-plugin>

@@ -1,0 +1,5 @@
+rootProject.name = "Eden"
+
+include(':eden-ide')
+include 'sample'
+
