@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
@@ -19,13 +18,6 @@ allprojects {
         google()
         maven { setUrl("https://www.jetbrains.com/intellij-repository/releases/") }
         mavenCentral()
-    }
-    tasks.withType(KotlinCompile::class).all {
-        kotlinOptions {
-            freeCompilerArgs = listOf(
-                "-Xjvm-default=enable", "-Xopt-in=kotlin.ExperimentalStdlibApi",
-            )
-        }
     }
     extra["idePath"] = getIdePath()
 }

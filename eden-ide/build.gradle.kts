@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("org.jetbrains.intellij")
+    id("com.vanniktech.maven.publish")
     kotlin("jvm")
 }
 
