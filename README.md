@@ -144,6 +144,8 @@ val fakeClass = Eden.fakeClass("Test", "com.fake.test") {
 
 ## 协议与参考
 
+[Apache License 2.0](./LICENCE)
+
 此项目使用到了如下开源项目：
 
 - JetBrains IDEA
