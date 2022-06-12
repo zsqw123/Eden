@@ -1,6 +1,6 @@
 # Eden
 
-再也不需要 kapt/ksp 的编译浪费时间！实时扫描带注解的类、方法、属性，并生成我们想生成的类，同时给予 IDE 实时提示！
+再也不需要等待 kapt/ksp 生成类的编译浪费时间！实时扫描带注解的类、方法、属性，并生成我们想生成的类，同时给予 IDE 实时提示！
 
 ## Preview
 
@@ -143,6 +143,8 @@ val fakeClass = Eden.fakeClass("Test", "com.fake.test") {
 - 关于 `Fake DSL` 的使用，可以参照: [FakeClassGenTest](/eden-ide/src/test/java/FakeClassGenTest.kt)
 
 ## 协议与参考
+
+[Apache License 2.0](./LICENCE)
 
 此项目使用到了如下开源项目：
 
