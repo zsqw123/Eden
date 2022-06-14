@@ -2,6 +2,7 @@ package com.zsu.eden
 
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElementFinder
+import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiPackage
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.CachedValue
@@ -31,7 +32,13 @@ open class EdenClassFinder(private val edenCache: EdenCache, private val modific
             val map = classCached.value.groupBy { it.packageName ?: "" }
             CachedValueProvider.Result.create(map, modificationTracker)
         }
+        PsiManager.getInstance(edenCache.project)
+            .addPsiTreeChangeListener(ChangeListener(), edenCache.project)
     }
+
+    inner class ChangeListener : EdenAnnotatedChange(
+        edenCache.annotationFqn.substringAfterLast('.'), modificationTracker
+    )
 
     override fun findClass(qualifiedName: String, scope: GlobalSearchScope): PsiClass? {
         return fqnClassCached.value[qualifiedName]

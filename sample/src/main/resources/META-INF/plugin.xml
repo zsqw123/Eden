@@ -19,8 +19,6 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-<!--        <resolveScopeEnlarger implementation="com.zsu.eden.sample.MowoScopeEnlarger"/>-->
-        <psi.treeChangeListener implementation="com.zsu.eden.sample.FakeChangeListener"/>
         <java.shortNamesCache implementation="com.zsu.eden.sample.FakeShortNameCache"/>
         <java.elementFinder implementation="com.zsu.eden.sample.FakeClassFinder"/>
     </extensions>

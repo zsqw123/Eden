@@ -50,9 +50,6 @@ class FakeShortNameCache(project: Project) : EdenClassNamesCache(FakeClassCache.
 // 这个是为了让类不爆红
 class FakeClassFinder(project: Project) : EdenClassFinder(FakeClassCache.getInstance(project), FakeTracker.getInstance(project))
 
-// 注解变动监听器
-class FakeChangeListener(project: Project) : EdenAnnotatedChange(fakeFqn.substringAfterLast('.'), FakeTracker.getInstance(project))
-
 // 用于刷新缓存
 @Service
 class FakeTracker : EdenModificationTracker() {

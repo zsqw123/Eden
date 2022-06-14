@@ -33,6 +33,7 @@ abstract class SimpleAnnotatedChange(private val annotationShortName: String) : 
 
     private fun onChange(element: PsiElement?) {
         element ?: return
+        // Checking its 2 parent nodes, not checking too much here, because of performance loss concerns
         for (ktDeclaration in element.parentsOfType<KtDeclaration>().take(2)) {
             val annotations = ktDeclaration.annotationEntries
             if (annotations.isEmpty()) continue

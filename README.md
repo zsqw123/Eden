@@ -76,10 +76,6 @@ class FakeShortNameCache(project: Project) :
 class FakeClassFinder(project: Project) :
     EdenClassFinder(FakeClassCache.getInstance(project), FakeTracker.getInstance(project))
 
-// 注解变动监听器
-class FakeChangeListener(project: Project) :
-    EdenAnnotatedChange(fakeFqn.substringAfterLast('.'), FakeTracker.getInstance(project))
-
 @Service // 用于刷新缓存
 class FakeTracker : EdenModificationTracker() {
     companion object {
@@ -94,7 +90,6 @@ class FakeTracker : EdenModificationTracker() {
 
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
-        <psi.treeChangeListener implementation="com.zsu.eden.sample.FakeChangeListener"/>
         <java.shortNamesCache implementation="com.zsu.eden.sample.FakeShortNameCache"/>
         <java.elementFinder implementation="com.zsu.eden.sample.FakeClassFinder"/>
     </extensions>
@@ -141,6 +136,12 @@ val fakeClass = Eden.fakeClass("Test", "com.fake.test") {
 
 - 具体的例子可以参考 sample 模块: [sample](/sample)
 - 关于 `Fake DSL` 的使用，可以参照: [FakeClassGenTest](/eden-ide/src/test/java/FakeClassGenTest.kt)
+
+### 运行环境
+
+| java | idea         |
+|------|--------------|
+| 11+  | 201.6858.69+ |
 
 ## 协议与参考
 

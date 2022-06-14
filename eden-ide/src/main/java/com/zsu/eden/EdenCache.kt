@@ -5,7 +5,7 @@ import com.intellij.psi.PsiClass
 import com.zsu.eden.dsl.FakeClass
 import org.jetbrains.kotlin.psi.KtDeclaration
 
-abstract class EdenCache(internal val project: Project, private val annotationFqn: String) {
+abstract class EdenCache(internal val project: Project, internal val annotationFqn: String) {
     abstract fun processAnnotation(annotations: Sequence<KtDeclaration>): Sequence<FakeClass>
 
     fun getClasses(): Sequence<PsiClass> {
