@@ -1,11 +1,15 @@
 # Eden
 
-再也不需要等待 kapt/ksp 生成类的编译浪费时间！实时扫描带注解的类、方法、属性，并生成我们想生成的类，同时给予 IDE 实时提示！
+No more wasted time waiting for kapt/ksp to generate classes for compilation!
+Scan annotated elements and generating the classes we want to generate automatically, while
+giving the IDE real-time hints!
+
+再也不需要等待 kapt/ksp 生成类的编译浪费时间！使用 IDE 插件实时扫描带注解的类、方法、属性，并生成我们想生成的类，同时给予实时提示！
 
 ## Preview
 
 ![](https://cdn.jsdelivr.net/gh/zsqw123/cdn@master/picCDN/202206111257981.gif)
-而实现这些，只需要编写非常简单的 DSL:
+This is implemented by writing a very simple DSL:
 
 ```kotlin
 Eden.fakeClass("Fake${ktDeclaration.capitalizeAsciiOnly()}", ktDeclaration.packageName) {
@@ -17,7 +21,7 @@ Eden.fakeClass("Fake${ktDeclaration.capitalizeAsciiOnly()}", ktDeclaration.packa
 
 ## Usage
 
-### 1. 添加依赖
+### 1. Add Dependencies
 
 maven-central
 release
@@ -32,26 +36,27 @@ dependencies {
 }
 ```
 
-### 2. 实现注解处理
+### 2. Implement Annotation Processor
 
-1. 先定义好要处理的注解
-2. 处理被指定注解所注解 `KtDeclaration`
-3. 生成供 IDE 提示的虚拟类
+1. Define the annotations to be processed
+2. Handling the `KtDeclaration` which annotated by the specified annotation.
+3. Generate virtual classes for IDE hints
 
 ```kotlin
 val fakeFqn = "com.fake.FakeClass" // the annotation full qualified name which need to process
 
 @Service // Regist a IDEA light service
 class FakeClassCache(project: Project) : EdenCache(project, fakeFqn) {
-    // 需要在这里处理被指定注解所注解的 KtDeclaration, 然后生成相应的虚拟类
+    // The `KtDeclaration` annotated by the specified annotation needs to be processed here,
+    // and the corresponding virtual class generated is returned.
     override fun processAnnotation(annotations: Sequence<KtDeclaration>): Sequence<FakeClass> =
         annotations.mapNotNull { ktDeclaration ->
             val name = ktDeclaration.name ?: return@mapNotNull null
             val className = "Fake${name.capitalizeAsciiOnly()}"
             Eden.fakeClass(className, ktDeclaration.packageName) {
-                method("fakeMethod") // 生成在这个类里面的虚拟方法
-                field("fakeField", "String") // 生成在这个类里面的虚拟变量
-                clazz("FakeInnerClass") // 虚拟内部类
+                method("fakeMethod") // Generate virtual methods inside this class
+                field("fakeField", "String") // Generate virtual variables inside this class
+                clazz("FakeInnerClass") // virtual internal classes
             }
         }
 
@@ -61,22 +66,22 @@ class FakeClassCache(project: Project) : EdenCache(project, fakeFqn) {
 }
 ```
 
-### 3. 实现缓存及实时提示
+### 3. Implement Caching and Real-Time Hints
 
-1. 实现在输入字符时实时提示
-2. 避免在 IDE 解析时虚拟类飘红
-3. 在注解元素变动的时候销毁之前生成的虚拟类缓存
+1. Real-time hints as characters are entered
+2. Avoid virtual class report error when parsing in the IDE
+3. Drop the previously generated virtual class cache when the annotated element changes
 
 ```kotlin
-// 输入字符时的实时提示框
+// Live alert box when entering characters
 class FakeShortNameCache(project: Project) :
     EdenClassNamesCache(FakeClassCache.getInstance(project), FakeTracker.getInstance(project))
 
-// 这个是为了让类不爆红
+// Avoid virtual class report error when parsing in the IDE
 class FakeClassFinder(project: Project) :
     EdenClassFinder(FakeClassCache.getInstance(project), FakeTracker.getInstance(project))
 
-@Service // 用于刷新缓存
+@Service // refreshing the cache by ModificationTracker
 class FakeTracker : EdenModificationTracker() {
     companion object {
         fun getInstance(project: Project) = project.getService(FakeTracker::class.java)
@@ -84,7 +89,7 @@ class FakeTracker : EdenModificationTracker() {
 }
 ```
 
-并在 `plugin.xml` 中注册:
+register it in `plugin.xml`:
 
 ```xml
 
@@ -97,6 +102,9 @@ class FakeTracker : EdenModificationTracker() {
 ```
 
 ## Fake DSL
+
+In Eden, the process of generating a virtual class only requires `Eden.fakeClass` to generate a virtual class.
+It supports the construction of virtual class structures using simple DSLs.
 
 在 Eden 框架中，生成虚拟类的过程是简单的，只需要通过 `Eden.fakeClass` 即可生成一个虚拟类。它支持使用简单的 DSL 构建虚拟的类结构。
 
@@ -129,25 +137,28 @@ val fakeClass = Eden.fakeClass("Test", "com.fake.test") {
     }
 }
 ```
+> These methods actually generate the corresponding java psi behind the scenes, and for the time being do not support
+> declaring the type nullable. The structure of the method and the initialization body of the variable are omitted, as
+> generating an overly heavy structure would add to the parsing burden of the IDE
+>
+> 这些方法其实背后生成了对应的 java psi，暂时不支持声明类型是否可空，方法的结构体和变量的初始化体均被省略，因为生成过重的结构会加重 IDE 解析的负担 
 
-> 这些方法其实背后生成了对应的 java psi，暂时不支持声明类型是否可空，方法的结构体和变量的初始化体均被省略，因为生成过重的结构会加重 IDE 解析的负担
+## More
 
-## 更多
+- For an example, see the `sample` module: [sample](/sample)
+- About `Fake DSL` example: [FakeClassGenTest](/eden-ide/src/test/java/FakeClassGenTest.kt)
 
-- 具体的例子可以参考 sample 模块: [sample](/sample)
-- 关于 `Fake DSL` 的使用，可以参照: [FakeClassGenTest](/eden-ide/src/test/java/FakeClassGenTest.kt)
-
-### 运行环境
+### Environment
 
 | java | idea         |
 |------|--------------|
 | 11+  | 201.6858.69+ |
 
-## 协议与参考
+## License & References
 
 [Apache License 2.0](./LICENCE)
 
-此项目使用到了如下开源项目：
+This project uses the following open source projects：
 
 - JetBrains IDEA
 - JetBrains Kotlin
