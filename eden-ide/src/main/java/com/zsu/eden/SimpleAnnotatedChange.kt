@@ -3,23 +3,24 @@ package com.zsu.eden
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiTreeChangeAdapter
 import com.intellij.psi.PsiTreeChangeEvent
+import com.intellij.psi.util.parentsOfType
 import org.jetbrains.kotlin.psi.KtDeclaration
 
 abstract class SimpleAnnotatedChange(private val annotationShortName: String) : PsiTreeChangeAdapter() {
     override fun childAdded(event: PsiTreeChangeEvent) {
-        onChange(event.parent)
+        onChange(event.child)
     }
 
     override fun childRemoved(event: PsiTreeChangeEvent) {
-        onChange(event.parent)
+        onChange(event.child)
     }
 
     override fun childReplaced(event: PsiTreeChangeEvent) {
-        onChange(event.parent)
+        onChange(event.newChild)
     }
 
     override fun childMoved(event: PsiTreeChangeEvent) {
-        onChange(event.newParent)
+        onChange(event.child)
     }
 
     override fun childrenChanged(event: PsiTreeChangeEvent) {
@@ -31,11 +32,14 @@ abstract class SimpleAnnotatedChange(private val annotationShortName: String) : 
     }
 
     private fun onChange(element: PsiElement?) {
-        if (element !is KtDeclaration) return
-        val annotations = element.annotationEntries
-        if (annotations.isEmpty()) return
-        if (annotations.any { it.shortName?.asString() == annotationShortName }) {
-            onAnnotatedElementChange(element)
+        element ?: return
+        for (ktDeclaration in element.parentsOfType<KtDeclaration>().take(2)) {
+            val annotations = ktDeclaration.annotationEntries
+            if (annotations.isEmpty()) continue
+            if (annotations.any { it.shortName?.asString() == annotationShortName }) {
+                onAnnotatedElementChange(ktDeclaration)
+                break
+            }
         }
     }
 
