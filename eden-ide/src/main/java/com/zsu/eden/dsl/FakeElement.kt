@@ -1,5 +1,6 @@
 package com.zsu.eden.dsl
 
+import com.intellij.psi.PsiElement
 import org.intellij.lang.annotations.Language
 
 @FakeElementDsl
@@ -8,6 +9,10 @@ abstract class FakeElement(
 ) {
     @Language("java")
     abstract override fun toString(): String
+
+    /** 当使用 command 点击元素时跳转到的位置 */
+    open val navigateTo: PsiElement? = null
+
     protected fun java(@Language("java") string: String) = string
     protected fun TypeParams.asString() = buildString {
         if (this@asString.isNotEmpty()) {
