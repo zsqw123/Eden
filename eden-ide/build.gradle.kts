@@ -11,7 +11,7 @@ repositories {
 }
 
 group = "io.github.zsqw123"
-version = "1.0.1"
+version = "1.0.2"
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
