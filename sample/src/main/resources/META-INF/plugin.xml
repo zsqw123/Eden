@@ -1,4 +1,4 @@
-<idea-plugin>
+<idea-plugin xmlns:xi="http://www.w3.org/2001/XInclude">
     <id>com.zsu.eden.idea.sample</id>
     <name>Eden-IDEA</name>
     <idea-version since-build="201.6858.69"/>
@@ -10,6 +10,7 @@
     Eden Lint IDEA Plugin.<br>
     ]]></description>
 
+    <xi:include href="/META-INF/Eden-plugin.xml"/>
     <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
          on how to target different products -->
     <depends>com.intellij.modules.platform</depends>

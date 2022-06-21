@@ -1,0 +1,7 @@
+<idea-plugin>
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <gotoDeclarationHandler implementation="com.zsu.eden.EdenGoto"/>
+    </extensions>
+</idea-plugin>

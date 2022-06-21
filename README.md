@@ -89,11 +89,12 @@ class FakeTracker : EdenModificationTracker() {
 }
 ```
 
-register it in `plugin.xml`:
+register it in `plugin.xml`, don't forget include `Eden-plugin.xml`!
 
 ```xml
 
-<idea-plugin>
+<idea-plugin xmlns:xi="http://www.w3.org/2001/XInclude">
+    <xi:include href="/META-INF/Eden-plugin.xml"/>
     <extensions defaultExtensionNs="com.intellij">
         <java.shortNamesCache implementation="com.zsu.eden.sample.FakeShortNameCache"/>
         <java.elementFinder implementation="com.zsu.eden.sample.FakeClassFinder"/>
@@ -135,6 +136,7 @@ val fakeClass = Eden.fakeClass("Test", "com.fake.test") {
     clazz("J") {
         isStatic = true // 静态内部类
     }
+    goto = psiElement // used for idea navigation
 }
 ```
 > These methods actually generate the corresponding java psi behind the scenes, and for the time being do not support

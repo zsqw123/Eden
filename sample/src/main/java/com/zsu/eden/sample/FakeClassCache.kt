@@ -34,6 +34,7 @@ class FakeClassCache(project: Project) : EdenCache(project, fakeFqn) {
                 )
                 returnType = "int"
             }
+            goto = ktDeclaration
         }
     }
 
