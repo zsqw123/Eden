@@ -128,6 +128,7 @@ val fakeClass = Eden.fakeClass("Test", "com.fake.test") {
         returnType = "ArrayList<D>" // 返回值类型
         isPublic = false
         typeParam("D", "String")
+        navigateTo = psiElement // used for idea navigation
     }
     clazz("I") { // 内部类
         method("iA")
@@ -136,7 +137,7 @@ val fakeClass = Eden.fakeClass("Test", "com.fake.test") {
     clazz("J") {
         isStatic = true // 静态内部类
     }
-    goto = psiElement // used for idea navigation
+    navigateTo = psiElement // used for idea navigation
 }
 ```
 > These methods actually generate the corresponding java psi behind the scenes, and for the time being do not support

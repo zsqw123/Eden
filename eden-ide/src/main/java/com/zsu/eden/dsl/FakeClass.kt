@@ -3,7 +3,6 @@ package com.zsu.eden.dsl
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiJavaFile
 
@@ -15,9 +14,8 @@ class FakeClass(name: String, var packageName: String? = null) : FakeElement(nam
     private var extends: String? = null
     private val implements = arrayListOf<String>()
     val methods = arrayListOf<FakeMethod>()
-    private val fields = arrayListOf<FakeField>()
+    val fields = arrayListOf<FakeField>()
     val classes = arrayListOf<FakeClass>()
-    var goto: PsiElement? = null // navigate to declaration
 
     fun imports(vararg body: String) {
         imports.addAll(body)
@@ -45,8 +43,9 @@ class FakeClass(name: String, var packageName: String? = null) : FakeElement(nam
     fun field(
         fieldName: String, type: String,
         isPublic: Boolean = true, isStatic: Boolean = false,
+        action: FakeField.() -> Unit = {},
     ) {
-        fields.add(FakeField(fieldName, type, isPublic, isStatic))
+        fields.add(FakeField(fieldName, type, isPublic, isStatic).apply(action))
     }
 
     inline fun clazz(className: String, body: FakeClass.() -> Unit = {}) {

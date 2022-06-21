@@ -21,6 +21,7 @@ class FakeClassCache(project: Project) : EdenCache(project, fakeFqn) {
             field("fakeField", "String")
             clazz("FakeInnerClass")
             method("fakeMethodStatic") {
+                navigateTo = ktDeclaration.firstChild
                 isStatic = true
             }
             field("fakeFieldStatic", "int", isStatic = true)
@@ -34,7 +35,7 @@ class FakeClassCache(project: Project) : EdenCache(project, fakeFqn) {
                 )
                 returnType = "int"
             }
-            goto = ktDeclaration
+            navigateTo = ktDeclaration
         }
     }
 

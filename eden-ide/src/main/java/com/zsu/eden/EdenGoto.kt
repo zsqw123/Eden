@@ -1,6 +1,6 @@
 package com.zsu.eden
 
-import com.intellij.codeInsight.navigation.actions.GotoDeclarationHandlerBase
+import com.intellij.codeInsight.navigation.actions.GotoDeclarationHandler
 import com.intellij.lang.java.JavaLanguage
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.editor.Editor
@@ -11,8 +11,8 @@ import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.kotlin.nj2k.postProcessing.resolve
 import org.jetbrains.kotlin.psi.KtReferenceExpression
 
-class EdenGoto : GotoDeclarationHandlerBase() {
-    override fun getGotoDeclarationTarget(sourceElement: PsiElement?, editor: Editor?): PsiElement? {
+class EdenGoto : GotoDeclarationHandler {
+    override fun getGotoDeclarationTargets(sourceElement: PsiElement?, offset: Int, editor: Editor?): Array<PsiElement>? {
         sourceElement ?: return null
         val res = runReadAction {
             return@runReadAction when (sourceElement.language) {

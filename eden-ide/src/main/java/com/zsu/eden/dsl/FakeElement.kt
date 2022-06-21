@@ -11,7 +11,7 @@ abstract class FakeElement(
     abstract override fun toString(): String
 
     /** 当使用 command 点击元素时跳转到的位置 */
-    open val navigateTo: PsiElement? = null
+    open var navigateTo: PsiElement? = null
 
     protected fun java(@Language("java") string: String) = string
     protected fun TypeParams.asString() = buildString {
