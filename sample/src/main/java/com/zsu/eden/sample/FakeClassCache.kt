@@ -24,6 +24,9 @@ class FakeClassCache(project: Project) : EdenCache(project, fakeFqn) {
                 navigateTo = ktDeclaration.firstChild
                 isStatic = true
             }
+            constructor {
+                property("a", "int", isField = true)
+            }
             field("fakeFieldStatic", "int", isStatic = true)
             clazz("FakeInnerClassStatic") {
                 isStatic = true

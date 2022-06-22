@@ -13,6 +13,7 @@ class FakeClass(name: String, var packageName: String? = null) : FakeElement(nam
     private val typeParams = TypeParams() // first extends second
     private var extends: String? = null
     private val implements = arrayListOf<String>()
+    val constructors = arrayListOf<FakeConstructor>()
     val methods = arrayListOf<FakeMethod>()
     val fields = arrayListOf<FakeField>()
     val classes = arrayListOf<FakeClass>()
@@ -36,16 +37,21 @@ class FakeClass(name: String, var packageName: String? = null) : FakeElement(nam
         typeParams.add(typeParam to extends)
     }
 
+    inline fun constructor(body: FakeConstructor.() -> Unit = {}) {
+        constructors.add(FakeConstructor(name).apply(body))
+    }
+
     inline fun method(methodName: String, body: FakeMethod.() -> Unit = {}) {
         methods.add(FakeMethod(methodName).apply(body))
     }
 
-    fun field(
+    inline fun field(
         fieldName: String, type: String,
+        isFinal: Boolean = true,
         isPublic: Boolean = true, isStatic: Boolean = false,
         action: FakeField.() -> Unit = {},
     ) {
-        fields.add(FakeField(fieldName, type, isPublic, isStatic).apply(action))
+        fields.add(FakeField(fieldName, type, isFinal, isPublic, isStatic).apply(action))
     }
 
     inline fun clazz(className: String, body: FakeClass.() -> Unit = {}) {
@@ -75,6 +81,18 @@ class FakeClass(name: String, var packageName: String? = null) : FakeElement(nam
         append("{\n")
         if (fields.isNotEmpty()) {
             append(fields.joinToString("\n"))
+            append('\n')
+        }
+        if (constructors.isNotEmpty()) {
+            val constructorFields = constructors
+                .flatMap { it.properties }
+                .filter { it.isField }
+                .distinctBy { it.name }
+            if (constructorFields.isNotEmpty()) {
+                append(constructorFields.joinToString("\n") { it.toFakeField().toString() })
+                append('\n')
+            }
+            append(constructors.joinToString("\n"))
             append('\n')
         }
         if (methods.isNotEmpty()) {

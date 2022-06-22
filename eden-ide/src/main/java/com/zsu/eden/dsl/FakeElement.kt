@@ -13,7 +13,6 @@ abstract class FakeElement(
     /** 当使用 command 点击元素时跳转到的位置 */
     open var navigateTo: PsiElement? = null
 
-    protected fun java(@Language("java") string: String) = string
     protected fun TypeParams.asString() = buildString {
         if (this@asString.isNotEmpty()) {
             append('<')
@@ -26,6 +25,8 @@ abstract class FakeElement(
         }
     }
 }
+
+internal fun java(@Language("java") string: String) = string
 
 
 @DslMarker
