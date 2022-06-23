@@ -1,15 +1,12 @@
 package com.zsu.eden.util
 
 import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiClassType
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiPrimitiveType
 import com.intellij.psi.PsiType
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.kotlin.idea.core.getPackage
-import org.jetbrains.kotlin.idea.highlighter.markers.collectContainingClasses
-import org.jetbrains.kotlin.psi.KtElement
+import java.util.*
 
 val PsiType.packageName: String?
     get() = typeClass?.packageName
@@ -27,9 +24,10 @@ val PsiFile.packageName: String?
     get() = containingDirectory?.getPackage()?.qualifiedName
 
 fun PsiClass.allChildClasses(): Collection<PsiClass> {
-    val childClasses = allInnerClasses
-    if (childClasses.isEmpty()) return emptyList()
-    val res = childClasses.toMutableList()
+    val childClasses = innerClasses
+    if (childClasses.isEmpty()) return listOf()
+    val res = LinkedList<PsiClass>()
+    res.addAll(childClasses)
     for (child in childClasses) {
         res.addAll(child.allChildClasses())
     }
