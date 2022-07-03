@@ -21,7 +21,8 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <java.shortNamesCache implementation="com.zsu.eden.sample.FakeShortNameCache"/>
-        <java.elementFinder implementation="com.zsu.eden.sample.FakeClassFinder"/>
+        <!--        <java.elementFinder implementation="com.zsu.eden.sample.FakeClassFinder"/>-->
+<!--        <indexedRootsProvider implementation="com.zsu.eden.sample.FakeIndexContributor"/>-->
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij.java">
@@ -29,8 +30,7 @@
     </extensions>
 
     <extensions defaultExtensionNs="org.jetbrains.kotlin">
-<!--        <resolveScopeEnlarger implementation="com.zsu.eden.sample.MowoKotlinScopeEnlarger"/>-->
-        <!-- kotlin extension-->
+        <resolveScopeEnlarger implementation="com.zsu.eden.sample.FakeKotlinScopeEnlarger"/>
     </extensions>
     <actions>
         <!-- Add your actions here -->

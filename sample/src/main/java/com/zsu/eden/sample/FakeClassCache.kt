@@ -1,11 +1,19 @@
 package com.zsu.eden.sample
 
+import com.ibm.icu.impl.CacheValue
 import com.intellij.openapi.components.Service
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ModuleRootModificationUtil
+import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.util.CachedValueProvider
+import com.intellij.util.indexing.IndexableSetContributor
 import com.zsu.eden.*
 import com.zsu.eden.dsl.Eden
 import com.zsu.eden.dsl.FakeClass
 import com.zsu.eden.util.packageName
+import org.jetbrains.kotlin.idea.caches.project.getModuleInfo
+import org.jetbrains.kotlin.idea.core.util.CachedValue
 import org.jetbrains.kotlin.psi.KtDeclaration
 import org.jetbrains.kotlin.util.capitalizeDecapitalize.capitalizeAsciiOnly
 
@@ -55,6 +63,8 @@ class FakeShortNameCache(project: Project) : EdenClassNamesCache(FakeClassCache.
 // 这个是为了让类不爆红
 class FakeClassFinder(project: Project) : EdenClassFinder(FakeClassCache.getInstance(project), FakeTracker.getInstance(project))
 
+class FakeKotlinScopeEnlarger : EdenResolveScopeEnlarger({ FakeClassCache.getInstance(it) })
+
 // 用于刷新缓存
 @Service
 class FakeTracker : EdenModificationTracker() {
@@ -62,5 +72,14 @@ class FakeTracker : EdenModificationTracker() {
         fun getInstance(project: Project): FakeTracker {
             return project.getService(FakeTracker::class.java)
         }
+    }
+}
+
+class FakeIndexContributor : IndexableSetContributor() {
+    override fun getAdditionalRootsToIndex(): MutableSet<VirtualFile> = mutableSetOf()
+    override fun getAdditionalProjectRootsToIndex(project: Project): MutableSet<VirtualFile> {
+        if (DumbService.isDumb(project)) return mutableSetOf()
+        val files = FakeClassCache.getInstance(project).getClasses().map { it.containingFile.virtualFile }
+        return files.toMutableSet()
     }
 }

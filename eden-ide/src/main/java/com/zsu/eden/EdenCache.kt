@@ -20,10 +20,10 @@ abstract class EdenCache(internal val project: Project, internal val annotationF
         val classes = runReadAction {
             processAnnotation(annotations)
         }
+        val single = annotations.firstOrNull() ?: return emptySequence()
         return classes.mapNotNull {
-            runReadAction {
-                it.genPsiClass(project)
-            }
+//            it.genPsiClass(project)
+            it.toKtClass(single)
         }
     }
 
