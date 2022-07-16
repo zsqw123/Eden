@@ -5,6 +5,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiType
 import com.intellij.psi.util.PsiTypesUtil
+import org.jetbrains.kotlin.asJava.elements.FakeFileForLightClass
 import org.jetbrains.kotlin.idea.core.getPackage
 import java.util.*
 
@@ -19,6 +20,12 @@ val PsiType.typeClass: PsiClass?
 
 val PsiElement.packageName: String?
     get() = containingFile.containingDirectory?.getPackage()?.qualifiedName
+
+val PsiClass.ktFakePackageName: String?
+    get() {
+        val file = containingFile as? FakeFileForLightClass ?: return null
+        return file.packageName
+    }
 
 val PsiFile.packageName: String?
     get() = containingDirectory?.getPackage()?.qualifiedName

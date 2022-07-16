@@ -1,7 +1,8 @@
 package com.zsu.eden
 
+import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.NonClasspathClassFinder
 import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiElementFinder
 import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiPackage
 import com.intellij.psi.search.GlobalSearchScope
@@ -9,10 +10,16 @@ import com.intellij.psi.util.CachedValue
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.zsu.eden.util.allChildClasses
-import com.zsu.eden.util.packageName
+import com.zsu.eden.util.ktFakePackageName
+import org.jetbrains.kotlin.idea.core.script.KotlinScriptDependenciesClassFinder
+import org.jetbrains.kotlin.resolve.jvm.KotlinSafeClassFinder
 
+/**
+ * 想试图尝试仿照 [KotlinScriptDependenciesClassFinder]，但是这恐怕是一件非常具有挑战性的事情。
+ * 或许我需要进一步了解 kotlin idea plugin，我不会放弃的。
+ */
 open class EdenClassFinder(private val edenCache: EdenCache, private val modificationTracker: EdenModificationTracker) :
-    PsiElementFinder() {
+    NonClasspathClassFinder(edenCache.project), KotlinSafeClassFinder {
     private val classCached: CachedValue<Collection<PsiClass>>
     private val fqnClassCached: CachedValue<Map<String, PsiClass>>
     private val packageCached: CachedValue<Map<String, Collection<PsiClass>>>
@@ -29,7 +36,7 @@ open class EdenClassFinder(private val edenCache: EdenCache, private val modific
             CachedValueProvider.Result.create(map, modificationTracker)
         }
         packageCached = cachedValuesManager.createCachedValue {
-            val map = classCached.value.groupBy { it.packageName ?: "" }
+            val map = classCached.value.groupBy { it.ktFakePackageName ?: "" }
             CachedValueProvider.Result.create(map, modificationTracker)
         }
         PsiManager.getInstance(edenCache.project)
@@ -52,5 +59,9 @@ open class EdenClassFinder(private val edenCache: EdenCache, private val modific
     // for `*` import
     override fun getClasses(psiPackage: PsiPackage, scope: GlobalSearchScope): Array<PsiClass> {
         return packageCached.value[psiPackage.qualifiedName]?.toTypedArray() ?: PsiClass.EMPTY_ARRAY
+    }
+
+    override fun calcClassRoots(): List<VirtualFile> {
+        return listOf(EdenVFRoot(edenCache, modificationTracker))
     }
 }

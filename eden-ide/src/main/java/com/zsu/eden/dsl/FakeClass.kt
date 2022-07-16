@@ -1,14 +1,13 @@
 package com.zsu.eden.dsl
 
 import com.intellij.ide.highlighter.JavaFileType
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ModuleRootModificationUtil
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiJavaFile
-import org.jetbrains.kotlin.idea.util.module
+import org.jetbrains.kotlin.asJava.LightClassGenerationSupport
+import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtPsiFactory
 
 class FakeClass(name: String, var packageName: String? = null) : FakeElement(name) {
@@ -134,17 +133,17 @@ class FakeClass(name: String, var packageName: String? = null) : FakeElement(nam
     fun toKtClass(context: PsiElement): PsiClass? {
         val curText = """
             package com.aaa
-            class $name
+            class $name {
+                fun aFun() = 1
+            }
         """.trimIndent()
         if (psiText == curText) return psiCache
         else psiText = curText
-        val ktFile = KtPsiFactory(context.project).createFileWithLightClassSupport(
+        val ktFile = KtPsiFactory(context.project).createAnalyzableFile(
             "$name.kt", curText, context
         )
-//        ApplicationManager.getApplication().invokeLaterOnWriteThread {
-//            val module = context.module ?: return@invokeLaterOnWriteThread
-//            ModuleRootModificationUtil.addContentRoot(module, "/")
-//        }
-        return ktFile.classes.firstOrNull().also { psiCache = it }
+        val ktClass = ktFile.declarations.firstOrNull() as? KtClassOrObject ?: return null
+        val ktUltraLightClass = LightClassGenerationSupport.getInstance(context.project).createUltraLightClass(ktClass) ?: return null
+        return ktUltraLightClass.also { psiCache = it }
     }
 }
