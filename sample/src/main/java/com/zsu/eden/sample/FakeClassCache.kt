@@ -2,43 +2,52 @@ package com.zsu.eden.sample
 
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
-import com.zsu.eden.*
+import com.intellij.psi.PsiType
+import com.zsu.eden.EdenCache
+import com.zsu.eden.EdenClassFinder
+import com.zsu.eden.EdenClassNamesCache
+import com.zsu.eden.EdenModificationTracker
 import com.zsu.eden.dsl.Eden
-import com.zsu.eden.dsl.FakeClass
-import com.zsu.eden.util.packageName
-import org.jetbrains.kotlin.psi.KtDeclaration
+import com.zsu.eden.dsl.FakeFile
 import org.jetbrains.kotlin.util.capitalizeDecapitalize.capitalizeAsciiOnly
+import org.jetbrains.uast.UDeclaration
+import org.jetbrains.uast.UMethod
 
 internal const val fakeFqn = "com.fake.FakeClass"
 
 @Service
 class FakeClassCache(project: Project) : EdenCache(project, fakeFqn) {
-    override fun processAnnotation(annotations: Sequence<KtDeclaration>): Sequence<FakeClass> = annotations.mapNotNull { ktDeclaration ->
-        val name = ktDeclaration.name ?: return@mapNotNull null
+    override fun processAnnotation(annotations: List<UDeclaration>)
+        : List<FakeFile> = annotations.mapNotNull { declaration ->
+        val method = declaration as? UMethod ?: return@mapNotNull null
+        val originReturnType = method.returnType ?: PsiType.VOID
+        val name = declaration.name
         val className = "Fake${name.capitalizeAsciiOnly()}"
-        Eden.fakeClass(className, ktDeclaration.packageName) {
-            method("fakeMethod")
-            field("fakeField", "String")
+        Eden.fakeClassFile(className) {
+            method("fakeMethod"){
+                returnType = originReturnType
+            }
+            field("fakeField")
             clazz("FakeInnerClass")
             method("fakeMethodStatic") {
-                navigateTo = ktDeclaration.firstChild
+                navigateTo = method.sourcePsi
                 isStatic = true
             }
             constructor {
-                property("a", "int", isField = true)
+                property("c1", PsiType.INT, isField = true)
             }
-            field("fakeFieldStatic", "int", isStatic = true)
+            field("fakeFieldStatic")
             clazz("FakeInnerClassStatic") {
                 isStatic = true
             }
             method("fakeMethodParams") {
-                param(
+                textParam(
                     "a" to "String",
                     "b" to "int",
                 )
-                returnType = "int"
+                returnType = PsiType.INT
             }
-            navigateTo = ktDeclaration
+            navigateTo = method.sourcePsi
         }
     }
 

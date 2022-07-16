@@ -1,25 +1,26 @@
 import com.zsu.eden.dsl.Eden
 import com.zsu.eden.dsl.java
+import junit.framework.TestCase
 import org.junit.Test
 
-class FakeClassGenTest {
+class FakeClassGenTest : TestCase() {
     @Test
     fun testGen() {
-        val fakeClass = Eden.fakeClass("Test", "com.fake.test") {
-            imports("java.util.ArrayList", "java.util.HashMap")
+        val fakeClass = Eden.fakeClass("Test") {
+//            imports("java.util.ArrayList", "java.util.HashMap")
             isPublic = false
             typeParam("A")
             typeParam("B", "String")
             typeParam("C", "Integer")
             extends("HashMap<B,C>")
             implements("ArrayList<A>")
-            field("f", "ArrayList<B>", isPublic = false, isStatic = false)
-            field("fs", "int", isPublic = true, isStatic = true)
+//            field("f", "ArrayList<B>", isPublic = false, isStatic = false)
+//            field("fs", "int", isPublic = true, isStatic = true)
             constructor {
                 property("c1", "String")
                 property("c2", "int", isField = true)
-                property("c3", "long", isField = true, isFinal = false)
-                property("c4", "char", isField = true, isFinal = false, isPublic = false)
+                property("c3", "long", isField = true, isFinalField = false)
+                property("c4", "char", isField = true, isFinalField = false, isPublicField = false)
             }
             constructor {
                 isPublic = false
@@ -28,10 +29,10 @@ class FakeClassGenTest {
             }
             method("m") {
                 isStatic = true
-                param("p0" to "int", "p1" to "String")
+//                param("p0" to "int", "p1" to "String")
             }
             method("m") {
-                returnType = "ArrayList<D>"
+                returnType("ArrayList<D>")
                 isPublic = false
                 typeParam("D", "String")
             }
@@ -43,8 +44,8 @@ class FakeClassGenTest {
                 isStatic = true
             }
         }
-        assert(
-            fakeClass.toString() == java(
+        assertEquals(
+            java(
                 """
             import java.util.ArrayList;
             import java.util.HashMap;
@@ -67,7 +68,7 @@ class FakeClassGenTest {
             
             }
             }""".trimIndent()
-            )
+            ), fakeClass.toString()
         )
     }
 

@@ -11,8 +11,10 @@ import com.intellij.psi.util.CachedValuesManager
 import com.zsu.eden.util.allChildClasses
 import com.zsu.eden.util.packageName
 
-open class EdenClassFinder(private val edenCache: EdenCache, private val modificationTracker: EdenModificationTracker) :
-    PsiElementFinder() {
+open class EdenClassFinder(
+    private val edenCache: EdenCache,
+    private val modificationTracker: EdenModificationTracker
+) : PsiElementFinder() {
     private val classCached: CachedValue<Collection<PsiClass>>
     private val fqnClassCached: CachedValue<Map<String, PsiClass>>
     private val packageCached: CachedValue<Map<String, Collection<PsiClass>>>

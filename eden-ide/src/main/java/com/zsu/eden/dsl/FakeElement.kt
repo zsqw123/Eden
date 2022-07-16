@@ -7,6 +7,8 @@ import org.intellij.lang.annotations.Language
 abstract class FakeElement(
     val name: String
 ) {
+    internal open var raw: String? = null
+
     @Language("java")
     abstract override fun toString(): String
 

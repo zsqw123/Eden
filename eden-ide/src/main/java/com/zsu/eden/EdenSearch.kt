@@ -12,7 +12,9 @@ import com.intellij.psi.util.descendantsOfType
 import org.jetbrains.kotlin.idea.stubindex.KotlinAnnotationsIndex
 import org.jetbrains.kotlin.idea.stubindex.KotlinSourceFilterScope
 import org.jetbrains.kotlin.psi.KtAnnotationEntry
-import org.jetbrains.kotlin.psi.KtDeclaration
+import org.jetbrains.kotlin.psi.KtNamedDeclaration
+import org.jetbrains.uast.UDeclaration
+import org.jetbrains.uast.toUElementOfType
 
 object EdenSearch {
     private fun getAnnotation(project: Project, annotationFQN: String): PsiClass? {
@@ -22,23 +24,24 @@ object EdenSearch {
     fun getAnnotatedElements(
         project: Project, annotationFQN: String,
         scope: SearchScope = GlobalSearchScope.allScope(project)
-    ): Sequence<KtDeclaration> = sequence {
+    ): List<UDeclaration> = sequence {
         search(project, annotationFQN, scope) {
-            yield(it)
+            val uelement = it.toUElementOfType<UDeclaration>()
+            if (uelement != null && uelement.isPsiValid) yield(uelement)
         }
-    }
+    }.toList()
 
     // Copied some from com.android.tools.idea.dagger.DaggerAnnotatedElementsSearch
     private inline fun search(
-        project: Project,
-        annotationFQN: String,
-        scope: SearchScope,
-        kotlinProcessor: (KtDeclaration) -> Unit,
+        project: Project, annotationFQN: String, scope: SearchScope,
+        kotlinProcessor: (KtNamedDeclaration) -> Unit,
     ) {
         val annotationClass = getAnnotation(project, annotationFQN) ?: return
         val candidates = getKotlinAnnotationCandidates(annotationClass, scope)
         candidates.filterIsInstance<KtAnnotationEntry>().forEach { annotation ->
-            val declaration = PsiTreeUtil.getParentOfType(annotation, KtDeclaration::class.java) ?: return@forEach
+            val declaration =
+                PsiTreeUtil.getParentOfType(annotation, KtNamedDeclaration::class.java)
+                    ?: return@forEach
             kotlinProcessor(declaration)
         }
     }
