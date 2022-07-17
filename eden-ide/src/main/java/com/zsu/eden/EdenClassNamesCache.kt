@@ -3,26 +3,23 @@ package com.zsu.eden
 import com.intellij.psi.PsiClass
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.CachedValue
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
+import org.jetbrains.kotlin.idea.util.cachedValue
 
-internal const val FAKE_STUB = "FAKE_STUB"
+internal const val FAKE_STUB = "__FAKE_STUB"
 
-open class EdenClassNamesCache(edenClassCache: EdenCache, private val modificationTracker: EdenModificationTracker) :
+open class EdenClassNamesCache(edenClassCache: EdenCache) :
     ShortClassNamesCache() {
-    private val edenClassCachedValue: CachedValue<Map<String, Collection<PsiClass>>>
+    private val modificationTracker = edenClassCache.modificationTracker
 
-    init {
-        val cachedValuesManager = CachedValuesManager.getManager(edenClassCache.project)
-        edenClassCachedValue = cachedValuesManager.createCachedValue {
-            val classes = edenClassCache.getClasses()
+    private val edenClassCachedValue: CachedValue<Map<String, Collection<PsiClass>>> =
+        cachedValue(edenClassCache.project, modificationTracker) {
+            val classes = edenClassCache.generatedClasses.value
             val classShortNameMap = classes.groupBy { it.name ?: FAKE_STUB }
-            CachedValueProvider.Result.create(classShortNameMap, modificationTracker)
+            classShortNameMap
         }
-    }
 
     override fun getClassesByName(name: String, scope: GlobalSearchScope): Array<PsiClass> {
-        modificationTracker.incModificationCount()
+//        modificationTracker.incModificationCount()
         return edenClassCachedValue.value[name]?.toTypedArray() ?: PsiClass.EMPTY_ARRAY
     }
 

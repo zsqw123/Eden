@@ -5,45 +5,46 @@ import com.intellij.psi.PsiElementFinder
 import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiPackage
 import com.intellij.psi.search.GlobalSearchScope
-import com.intellij.psi.util.CachedValue
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
 import com.zsu.eden.util.allChildClasses
 import com.zsu.eden.util.packageName
 
 open class EdenClassFinder(
-    private val edenCache: EdenCache,
-    private val modificationTracker: EdenModificationTracker
+    private val edenCache: EdenCache
 ) : PsiElementFinder() {
-    private val classCached: CachedValue<Collection<PsiClass>>
-    private val fqnClassCached: CachedValue<Map<String, PsiClass>>
-    private val packageCached: CachedValue<Map<String, Collection<PsiClass>>>
+    private var classCached: Collection<PsiClass> = listOf()
+    private var fqnClassCached: Map<String, PsiClass> = mapOf()
+    private var packageCached: Map<String, Collection<PsiClass>> = mapOf()
+    private val modificationTracker = edenCache.modificationTracker
+    private var lastModified = -1L
 
     init {
-        val cachedValuesManager = CachedValuesManager.getManager(edenCache.project)
-        classCached = cachedValuesManager.createCachedValue {
-            val classes = edenCache.getClasses().toList()
-            val allChildren = classes.flatMap { it.allChildClasses() }
-            CachedValueProvider.Result.create(classes + allChildren, modificationTracker)
-        }
-        fqnClassCached = cachedValuesManager.createCachedValue {
-            val map = classCached.value.associateBy { it.qualifiedName ?: FAKE_STUB }
-            CachedValueProvider.Result.create(map, modificationTracker)
-        }
-        packageCached = cachedValuesManager.createCachedValue {
-            val map = classCached.value.groupBy { it.packageName ?: "" }
-            CachedValueProvider.Result.create(map, modificationTracker)
-        }
         PsiManager.getInstance(edenCache.project)
             .addPsiTreeChangeListener(ChangeListener(), edenCache.project)
     }
 
+    private fun refreshCache() {
+        if (edenCache.isProcessing) return
+        val classes = edenCache.generatedClasses.value
+        val allChildren = classes.flatMap { it.allChildClasses() }
+        classCached = classes + allChildren
+        fqnClassCached = classCached.associateBy { it.qualifiedName ?: FAKE_STUB }
+        packageCached = classCached.groupBy { it.packageName ?: "" }
+    }
+
+    @Synchronized
+    private fun tryRefresh() {
+        if (lastModified == modificationTracker.modificationCount) return
+        refreshCache()
+        lastModified = modificationTracker.modificationCount
+    }
+
     inner class ChangeListener : EdenAnnotatedChange(
-        edenCache.annotationFqn.substringAfterLast('.'), modificationTracker
+        edenCache.annotationFqn.substringAfterLast('.'), modificationTracker,
     )
 
     override fun findClass(qualifiedName: String, scope: GlobalSearchScope): PsiClass? {
-        return fqnClassCached.value[qualifiedName]
+        tryRefresh()
+        return fqnClassCached[qualifiedName]
     }
 
     override fun findClasses(qualifiedName: String, scope: GlobalSearchScope): Array<PsiClass> {
@@ -53,6 +54,7 @@ open class EdenClassFinder(
 
     // for `*` import
     override fun getClasses(psiPackage: PsiPackage, scope: GlobalSearchScope): Array<PsiClass> {
-        return packageCached.value[psiPackage.qualifiedName]?.toTypedArray() ?: PsiClass.EMPTY_ARRAY
+        tryRefresh()
+        return packageCached[psiPackage.qualifiedName]?.toTypedArray() ?: PsiClass.EMPTY_ARRAY
     }
 }

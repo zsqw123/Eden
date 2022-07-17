@@ -9,22 +9,26 @@ import com.zsu.eden.EdenClassNamesCache
 import com.zsu.eden.EdenModificationTracker
 import com.zsu.eden.dsl.Eden
 import com.zsu.eden.dsl.FakeFile
+import com.zsu.eden.util.packageName
 import org.jetbrains.kotlin.util.capitalizeDecapitalize.capitalizeAsciiOnly
 import org.jetbrains.uast.UDeclaration
 import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.kotlin.KotlinUMethod
+import org.jetbrains.uast.tryResolve
 
 internal const val fakeFqn = "com.fake.FakeClass"
 
 @Service
-class FakeClassCache(project: Project) : EdenCache(project, fakeFqn) {
+class FakeClassCache(project: Project) :
+    EdenCache(project, FakeTracker.getInstance(project), fakeFqn) {
     override fun processAnnotation(annotations: List<UDeclaration>)
         : List<FakeFile> = annotations.mapNotNull { declaration ->
         val method = declaration as? UMethod ?: return@mapNotNull null
         val originReturnType = method.returnType ?: PsiType.VOID
         val name = declaration.name
         val className = "Fake${name.capitalizeAsciiOnly()}"
-        Eden.fakeClassFile(className) {
-            method("fakeMethod"){
+        Eden.fakeClassFile(className, method.sourcePsi?.packageName ?: "") {
+            method("fakeMethod") {
                 returnType = originReturnType
             }
             field("fakeField")
@@ -59,10 +63,11 @@ class FakeClassCache(project: Project) : EdenCache(project, fakeFqn) {
 }
 
 // 这个是为了输入字符的时候实时提示
-class FakeShortNameCache(project: Project) : EdenClassNamesCache(FakeClassCache.getInstance(project), FakeTracker.getInstance(project))
+class FakeShortNameCache(project: Project) :
+    EdenClassNamesCache(FakeClassCache.getInstance(project))
 
 // 这个是为了让类不爆红
-class FakeClassFinder(project: Project) : EdenClassFinder(FakeClassCache.getInstance(project), FakeTracker.getInstance(project))
+class FakeClassFinder(project: Project) : EdenClassFinder(FakeClassCache.getInstance(project))
 
 // 用于刷新缓存
 @Service
