@@ -26,7 +26,7 @@ internal class ModuleAnnotatedHolder(
             val all = EdenSearch.getAnnotatedElements(module, annotationFqn)
             singleApt.processSingleModule(all)
         }
-        postCreateFiles(module, allFiles)
+        postCreateFiles(module, allFiles, singleApt)
         return true
     }
 
@@ -36,9 +36,12 @@ internal class ModuleAnnotatedHolder(
             hashSetOf(JavaSourceRootType.SOURCE, SourceKotlinRootType)
 
         private val executors = Executors.newCachedThreadPool()
-        private fun postCreateFiles(module: Module, allFiles: List<FileSpec>) = executors.execute {
+        private fun postCreateFiles(
+            module: Module, allFiles: List<FileSpec>, apt: EdenApt,
+        ) = executors.execute {
             if (allFiles.isEmpty()) return@execute
-            val sourceRoot = module.rootManager.getSourceRoots(kotlinSourceRoots).firstOrNull()
+            val sourceRoot = apt.getGeneratePath(module)
+                ?: module.rootManager.getSourceRoots(kotlinSourceRoots).firstOrNull()
             if (sourceRoot == null) {
                 logger.warn("no kotlin/java source root found in [${module.name}]!")
                 return@execute

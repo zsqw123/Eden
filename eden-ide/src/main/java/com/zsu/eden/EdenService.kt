@@ -3,7 +3,9 @@ package com.zsu.eden
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.extensions.ExtensionPointName
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFile
 import com.squareup.kotlinpoet.FileSpec
 import org.jetbrains.kotlin.psi.KtNamedDeclaration
 
@@ -28,6 +30,7 @@ class EdenService(private val project: Project) {
 interface EdenApt {
     val annotationFqn: String
     fun processSingleModule(all: List<KtNamedDeclaration>): List<FileSpec>
+    fun getGeneratePath(module: Module): VirtualFile? = null
 
     companion object {
         @Suppress("MemberVisibilityCanBePrivate")
