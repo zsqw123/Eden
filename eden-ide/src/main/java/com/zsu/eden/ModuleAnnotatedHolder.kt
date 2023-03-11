@@ -40,12 +40,16 @@ internal class ModuleAnnotatedHolder(
             }
         }
         if (allFiles.isNotEmpty()) executor.execute {
-            generated.forEach { if (it.exists()) it.delete() }
+            cleanAllGenerated()
             createFiles(module, allFiles, singleApt) {
                 generated = it
             }
         }
         return true
+    }
+
+    fun cleanAllGenerated() {
+        generated.forEach { if (it.exists()) it.delete() }
     }
 
     companion object {

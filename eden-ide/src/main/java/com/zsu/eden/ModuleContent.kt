@@ -59,6 +59,22 @@ internal class ModuleContent(private val module: Module) : Disposable {
         }
     }
 
+    fun refresh(fqns: List<String>?, needClean: Boolean) {
+        if (fqns == null) {
+            tracker.incModificationCount()
+            return
+        }
+        for ((annotation, holder) in annotatedCache) {
+            if (annotation in fqns) {
+                if (needClean) {
+                    holder.cleanAllGenerated()
+                }
+                holder.create()
+                break
+            }
+        }
+    }
+
     private inner class ChangeListener : SimpleAnnotatedChange(allAptSimple) {
         private var lastChanged = 0L
         override fun onAnnotatedElementChange(declaration: KtDeclaration) {

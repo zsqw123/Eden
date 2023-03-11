@@ -28,6 +28,14 @@ class EdenModuleCache(private val project: Project) {
         }
     }
 
+    internal fun refresh(module: Module, fqns: List<String>?, needClean: Boolean) {
+        moduleMap[module]?.refresh(fqns, needClean)
+    }
+
+    internal fun refresh(fqns: List<String>?, needClean: Boolean) {
+        moduleMap.forEach { it.value.refresh(fqns, needClean) }
+    }
+
     @Volatile
     private var loading = false
     fun tryLoadCache(scope: GlobalSearchScope) {
