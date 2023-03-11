@@ -8,6 +8,7 @@ import com.intellij.psi.search.PsiSearchScopeUtil
 import com.intellij.psi.util.CachedValue
 import org.jetbrains.kotlin.idea.util.cachedValue
 import org.jetbrains.kotlin.psi.KtDeclaration
+import kotlin.concurrent.thread
 
 internal class ModuleContent(private val module: Module) : Disposable {
     private val project = module.project
@@ -41,9 +42,25 @@ internal class ModuleContent(private val module: Module) : Disposable {
     }
 
     private inner class ChangeListener : SimpleAnnotatedChange(allAptSimple) {
+        private var lastChanged = 0L
+        private var shouldBeChanged = false
         override fun onAnnotatedElementChange(declaration: KtDeclaration) {
+            if (shouldBeChanged) return
             if (PsiSearchScopeUtil.isInScope(scope, declaration)) {
-                tracker.incModificationCount()
+                val current = System.currentTimeMillis()
+                val timeAfterLastChanged = (current - lastChanged).coerceAtLeast(0)
+                if (timeAfterLastChanged < 1500) {
+                    shouldBeChanged = true
+                    thread {
+                        Thread.sleep(1500 - timeAfterLastChanged)
+                        lastChanged = System.currentTimeMillis()
+                        shouldBeChanged = false
+                        tracker.incModificationCount()
+                    }
+                } else {
+                    lastChanged = System.currentTimeMillis()
+                    tracker.incModificationCount()
+                }
             }
         }
     }

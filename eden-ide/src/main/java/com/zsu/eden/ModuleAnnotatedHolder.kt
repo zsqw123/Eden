@@ -9,6 +9,7 @@ import org.jetbrains.jps.model.java.JavaSourceRootType
 import org.jetbrains.jps.model.module.JpsModuleSourceRootType
 import org.jetbrains.kotlin.config.SourceKotlinRootType
 import org.jetbrains.kotlin.idea.util.application.runReadAction
+import java.io.File
 import java.util.concurrent.Executors
 
 internal class ModuleAnnotatedHolder(
@@ -16,6 +17,7 @@ internal class ModuleAnnotatedHolder(
     private val annotationFqn: String,
 ) {
     private val edenService = EdenService.getInstance(module.project)
+    private var generated: List<File> = emptyList()
     fun create(): Boolean {
         val singleApt = edenService.allApt[annotationFqn]
         if (singleApt == null) {
@@ -26,7 +28,12 @@ internal class ModuleAnnotatedHolder(
             val all = EdenSearch.getAnnotatedElements(module, annotationFqn)
             singleApt.processSingleModule(all)
         }
-        postCreateFiles(module, allFiles, singleApt)
+        executor.execute {
+            generated.forEach { if (it.exists()) it.delete() }
+            createFiles(module, allFiles, singleApt) {
+                generated = it
+            }
+        }
         return true
     }
 
@@ -35,21 +42,33 @@ internal class ModuleAnnotatedHolder(
         private val kotlinSourceRoots: MutableSet<JpsModuleSourceRootType<*>> =
             hashSetOf(JavaSourceRootType.SOURCE, SourceKotlinRootType)
 
-        private val executors = Executors.newCachedThreadPool()
-        private fun postCreateFiles(
+        private val executor = Executors.newSingleThreadExecutor()
+        private inline fun createFiles(
             module: Module, allFiles: List<FileSpec>, apt: EdenApt,
-        ) = executors.execute {
-            if (allFiles.isEmpty()) return@execute
+            addedCallback: (added: List<File>) -> Unit,
+        ) {
+            if (allFiles.isEmpty()) return
             val sourceRoot = apt.getGeneratePath(module)
                 ?: module.rootManager.getSourceRoots(kotlinSourceRoots).firstOrNull()
             if (sourceRoot == null) {
                 logger.warn("no kotlin/java source root found in [${module.name}]!")
-                return@execute
+                return
             }
             val ioFile = VfsUtilCore.virtualToIoFile(sourceRoot)
+            val added = arrayListOf<File>()
             for (file in allFiles) {
                 file.writeTo(ioFile)
+                var outputDirectory = ioFile.toPath()
+                if (file.packageName.isNotEmpty()) {
+                    for (packageComponent in file.packageName.split('.')
+                        .dropLastWhile { it.isEmpty() }) {
+                        outputDirectory = outputDirectory.resolve(packageComponent)
+                    }
+                }
+                val outputPath = outputDirectory.resolve("${file.name}.kt")
+                added += outputPath.toFile()
             }
+            addedCallback(added)
             sourceRoot.refresh(true, true)
         }
     }

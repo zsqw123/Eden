@@ -52,7 +52,7 @@ internal const val fakeFqn = "com.fake.FakeClass"
 //    }
 //}
 
-class FakeApt : EdenApt {
+class FakeApt : EdenApt() {
     override val annotationFqn: String = fakeFqn
     override fun processSingleModule(all: List<KtNamedDeclaration>): List<FileSpec> {
         val allNames = all.mapNotNull { it.name }

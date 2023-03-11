@@ -6,10 +6,6 @@ giving the IDE real-time hints!
 
 再也不需要等待 kapt/ksp 生成类的编译浪费时间！使用 IDE 插件实时扫描带注解的类、方法、属性，并生成我们想生成的类，同时给予实时提示！
 
-Version 2.0 compared with version 1.0 is completely incapable, version 1.0: [README-1](README-1.md)
-
-Notice: 2.0 版本与 1.0 版本为完全不兼容改动，1.0 版本的 README: [README-1](README-1.md)
-
 ## Preview
 
 ![](https://cdn.jsdelivr.net/gh/zsqw123/cdn@master/picCDN/202206111257981.gif)
@@ -27,7 +23,8 @@ Eden.fakeClass("Fake${ktDeclaration.capitalizeAsciiOnly()}", ktDeclaration.packa
 
 ### 1. Add Dependencies
 
-maven-central release
+maven-central
+release
 version: [![Maven Central](https://img.shields.io/maven-central/v/io.github.zsqw123/eden-idea)](https://search.maven.org/artifact/io.github.zsqw123/eden-idea)
 
 ```groovy

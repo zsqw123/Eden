@@ -27,10 +27,10 @@ class EdenService(private val project: Project) {
     }
 }
 
-interface EdenApt {
-    val annotationFqn: String
-    fun processSingleModule(all: List<KtNamedDeclaration>): List<FileSpec>
-    fun getGeneratePath(module: Module): VirtualFile? = null
+abstract class EdenApt {
+    abstract val annotationFqn: String
+    abstract fun processSingleModule(all: List<KtNamedDeclaration>): List<FileSpec>
+    open fun getGeneratePath(module: Module): VirtualFile? = null
 
     companion object {
         @Suppress("MemberVisibilityCanBePrivate")
