@@ -6,38 +6,44 @@ import com.intellij.psi.PsiTreeChangeEvent
 import com.intellij.psi.util.parentsOfType
 import org.jetbrains.kotlin.psi.KtDeclaration
 
-abstract class SimpleAnnotatedChange(private val annotationShortName: String) : PsiTreeChangeAdapter() {
-    override fun childAdded(event: PsiTreeChangeEvent) {
+abstract class SimpleAnnotatedChange(private val shortNames: Collection<String>) :
+    PsiTreeChangeAdapter() {
+    final override fun childAdded(event: PsiTreeChangeEvent) {
         onChange(event.child)
     }
 
-    override fun childRemoved(event: PsiTreeChangeEvent) {
+    final override fun childRemoved(event: PsiTreeChangeEvent) {
         onChange(event.child)
     }
 
-    override fun childReplaced(event: PsiTreeChangeEvent) {
+    final override fun childReplaced(event: PsiTreeChangeEvent) {
         onChange(event.newChild)
     }
 
-    override fun childMoved(event: PsiTreeChangeEvent) {
+    final override fun childMoved(event: PsiTreeChangeEvent) {
         onChange(event.child)
     }
 
-    override fun childrenChanged(event: PsiTreeChangeEvent) {
+    final override fun childrenChanged(event: PsiTreeChangeEvent) {
         onChange(event.parent)
     }
 
-    override fun propertyChanged(event: PsiTreeChangeEvent) {
+    final override fun propertyChanged(event: PsiTreeChangeEvent) {
         onChange(event.element)
     }
 
     private fun onChange(element: PsiElement?) {
         element ?: return
-        // Checking its 2 parent nodes, not checking too much here, because of performance loss concerns
-        for (ktDeclaration in element.parentsOfType<KtDeclaration>().take(2)) {
+        // Checking its 3 parent nodes, not checking too much here, because of performance loss concerns
+        for (ktDeclaration in element.parentsOfType<KtDeclaration>().take(3)) {
             val annotations = ktDeclaration.annotationEntries
             if (annotations.isEmpty()) continue
-            if (annotations.any { it.shortName?.asString() == annotationShortName }) {
+            val hasChange = annotations.any { currentAnnotation ->
+                shortNames.any { shortNames ->
+                    currentAnnotation.shortName?.asString() == shortNames
+                }
+            }
+            if (hasChange) {
                 onAnnotatedElementChange(ktDeclaration)
                 break
             }

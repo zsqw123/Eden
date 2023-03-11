@@ -30,3 +30,7 @@ tasks {
         kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
     }
 }
+
+dependencies {
+    implementation("com.squareup:kotlinpoet:1.12.0")
+}

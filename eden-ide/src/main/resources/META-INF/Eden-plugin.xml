@@ -1,7 +1,14 @@
 <idea-plugin>
     <depends>com.intellij.modules.platform</depends>
+    <extensionPoints>
+        <extensionPoint qualifiedName="com.zsu.eden.edenApt" interface="com.zsu.eden.fast.EdenApt" dynamic="true"/>
+    </extensionPoints>
 
     <extensions defaultExtensionNs="com.intellij">
-        <gotoDeclarationHandler implementation="com.zsu.eden.EdenGoto"/>
     </extensions>
+    <projectListeners>
+        <listener class="com.zsu.eden.fast.EdenModuleListener" topic="com.intellij.openapi.project.ModuleListener"/>
+        <listener class="com.zsu.eden.fast.EdenModuleListener"
+                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
+    </projectListeners>
 </idea-plugin>

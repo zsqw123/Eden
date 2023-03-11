@@ -1,6 +1,6 @@
 package com.zsu.eden
 
-import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiClass
@@ -14,23 +14,20 @@ import org.jetbrains.kotlin.idea.stubindex.KotlinAnnotationsIndex
 import org.jetbrains.kotlin.idea.stubindex.KotlinSourceFilterScope
 import org.jetbrains.kotlin.psi.KtAnnotationEntry
 import org.jetbrains.kotlin.psi.KtNamedDeclaration
-import org.jetbrains.uast.UDeclaration
-import org.jetbrains.uast.toUElementOfType
 
 object EdenSearch {
     private fun getAnnotation(project: Project, annotationFQN: String): PsiClass? {
-        return JavaPsiFacade.getInstance(project).findClass(annotationFQN, GlobalSearchScope.allScope(project))
+        return JavaPsiFacade.getInstance(project)
+            .findClass(annotationFQN, GlobalSearchScope.allScope(project))
     }
 
     fun getAnnotatedElements(
-        project: Project, annotationFQN: String,
-        scope: SearchScope = GlobalSearchScope.allScope(project)
-    ): List<UDeclaration> = sequence {
-        search(project, annotationFQN, scope) {
-            val uelement = it.toUElementOfType<UDeclaration>()
-            if (uelement != null && uelement.isPsiValid) yield(uelement)
+        module: Module, annotationFqn: String,
+    ): List<KtNamedDeclaration> = buildList {
+        search(module.project, annotationFqn, module.moduleScope) {
+            add(it)
         }
-    }.toList()
+    }
 
     // Copied some from com.android.tools.idea.dagger.DaggerAnnotatedElementsSearch
     private inline fun search(

@@ -29,8 +29,12 @@
     </extensions>
 
     <extensions defaultExtensionNs="org.jetbrains.kotlin">
-<!--        <resolveScopeEnlarger implementation="com.zsu.eden.sample.MowoKotlinScopeEnlarger"/>-->
+        <!--        <resolveScopeEnlarger implementation="com.zsu.eden.sample.MowoKotlinScopeEnlarger"/>-->
         <!-- kotlin extension-->
+    </extensions>
+
+    <extensions defaultExtensionNs="com.zsu.eden">
+        <edenApt implementation="com.zsu.eden.sample.FakeApt"/>
     </extensions>
     <actions>
         <!-- Add your actions here -->
