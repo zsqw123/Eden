@@ -1,11 +1,8 @@
 package com.zsu.eden.sample
 
-import com.intellij.openapi.project.Project
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.TypeSpec
-import com.zsu.eden.EdenClassFinder
-import com.zsu.eden.EdenClassNamesCache
-import com.zsu.eden.fast.EdenApt
+import com.zsu.eden.EdenApt
 import org.jetbrains.kotlin.psi.KtNamedDeclaration
 import org.jetbrains.kotlin.util.capitalizeDecapitalize.capitalizeFirstWord
 
@@ -54,12 +51,6 @@ internal const val fakeFqn = "com.fake.FakeClass"
 //        }
 //    }
 //}
-
-// 这个是为了输入字符的时候实时提示
-class FakeShortNameCache(project: Project) : EdenClassNamesCache(project)
-
-// 这个是为了让类不爆红
-class FakeClassFinder(project: Project) : EdenClassFinder(project)
 
 class FakeApt : EdenApt {
     override val annotationFqn: String = fakeFqn

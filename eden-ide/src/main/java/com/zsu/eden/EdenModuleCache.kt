@@ -1,4 +1,4 @@
-package com.zsu.eden.fast
+package com.zsu.eden
 
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service

@@ -1,18 +1,17 @@
-package com.zsu.eden.fast
+package com.zsu.eden
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.squareup.kotlinpoet.FileSpec
-import com.zsu.eden.EdenSearch
 import org.jetbrains.jps.model.java.JavaSourceRootType
 import org.jetbrains.jps.model.module.JpsModuleSourceRootType
 import org.jetbrains.kotlin.config.SourceKotlinRootType
 import org.jetbrains.kotlin.idea.util.application.runReadAction
 import java.util.concurrent.Executors
 
-class ModuleAnnotatedHolder(
+internal class ModuleAnnotatedHolder(
     private val module: Module,
     private val annotationFqn: String,
 ) {

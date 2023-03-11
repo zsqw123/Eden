@@ -1,4 +1,4 @@
-package com.zsu.eden.fast
+package com.zsu.eden
 
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.ModuleListener

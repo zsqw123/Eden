@@ -1,15 +1,15 @@
-package com.zsu.eden
+package com.zsu.eden.extensions
 
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElementFinder
 import com.intellij.psi.PsiPackage
 import com.intellij.psi.search.GlobalSearchScope
-import com.zsu.eden.fast.EdenModuleCache
+import com.zsu.eden.EdenModuleCache
 
-open class EdenClassFinder(
-    project: Project
-) : PsiElementFinder() {
+@Service
+class EdenClassFinder(project: Project) : PsiElementFinder() {
     private val edenModuleCache = EdenModuleCache.getInstance(project)
     private fun tryRefresh(scope: GlobalSearchScope) {
         edenModuleCache.tryLoadCache(scope)

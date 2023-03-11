@@ -1,4 +1,4 @@
-package com.zsu.eden.fast
+package com.zsu.eden
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.module.Module
@@ -6,11 +6,10 @@ import com.intellij.openapi.util.SimpleModificationTracker
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.PsiSearchScopeUtil
 import com.intellij.psi.util.CachedValue
-import com.zsu.eden.EdenAnnotatedChange
 import org.jetbrains.kotlin.idea.util.cachedValue
 import org.jetbrains.kotlin.psi.KtDeclaration
 
-class ModuleContent(private val module: Module) : Disposable {
+internal class ModuleContent(private val module: Module) : Disposable {
     private val project = module.project
     private val scope = module.moduleScope
     private val annotatedCache = HashMap<String, ModuleAnnotatedHolder>()
@@ -41,10 +40,10 @@ class ModuleContent(private val module: Module) : Disposable {
         psiManager.removePsiTreeChangeListener(changeListener)
     }
 
-    private inner class ChangeListener : EdenAnnotatedChange(allAptSimple, tracker) {
+    private inner class ChangeListener : SimpleAnnotatedChange(allAptSimple) {
         override fun onAnnotatedElementChange(declaration: KtDeclaration) {
             if (PsiSearchScopeUtil.isInScope(scope, declaration)) {
-                super.onAnnotatedElementChange(declaration)
+                tracker.incModificationCount()
             }
         }
     }

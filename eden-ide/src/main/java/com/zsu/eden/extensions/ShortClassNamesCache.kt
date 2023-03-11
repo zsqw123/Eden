@@ -1,4 +1,4 @@
-package com.zsu.eden
+package com.zsu.eden.extensions
 
 import com.intellij.psi.PsiField
 import com.intellij.psi.PsiMethod
