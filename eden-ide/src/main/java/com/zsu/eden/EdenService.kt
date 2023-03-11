@@ -33,7 +33,7 @@ abstract class EdenApt {
 
     open fun getGeneratePath(module: Module): VirtualFile? = null
     open fun checkEnable(module: Module): Boolean = true
-    open val variant: String = "main"
+    open val kspVariant: String = "main"
 
     companion object {
         @Suppress("MemberVisibilityCanBePrivate")

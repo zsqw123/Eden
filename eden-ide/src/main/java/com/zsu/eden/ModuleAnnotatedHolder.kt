@@ -51,8 +51,7 @@ internal class ModuleAnnotatedHolder(
             addedCallback: (added: List<File>) -> Unit,
         ) {
             if (allFiles.isEmpty()) return
-            val sourceRoot = apt.getGeneratePath(module)
-                ?: module.rootManager.getSourceRoots(kotlinSourceRoots).firstOrNull()
+            val sourceRoot = guessRootPath(apt, module)
             if (sourceRoot == null) {
                 logger.warn("no kotlin/java source root found in [${module.name}]!")
                 return
@@ -75,13 +74,13 @@ internal class ModuleAnnotatedHolder(
             sourceRoot.refresh(true, true)
         }
 
-        private fun guessKspPath(apt: EdenApt, module: Module): VirtualFile? {
+        private fun guessRootPath(apt: EdenApt, module: Module): VirtualFile? {
             val sourceRoot = apt.getGeneratePath(module)
             if (sourceRoot != null) return sourceRoot
 
             val extProjectPath = module.externalProjectPath
             if (extProjectPath != null) {
-                val file = File(extProjectPath, "build/generated/ksp/${apt.variant}/kotlin")
+                val file = File(extProjectPath, "build/generated/ksp/${apt.kspVariant}/kotlin")
                 if (!file.exists()) file.mkdirs()
                 return LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file)
             }
