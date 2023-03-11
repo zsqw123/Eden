@@ -29,9 +29,17 @@ internal class ModuleAnnotatedHolder(
         }
         val allFiles = runReadAction {
             val all = EdenSearch.getAnnotatedElements(module, annotationFqn)
-            singleApt.processSingleModule(all)
+            try {
+                singleApt.processSingleModule(all)
+            } catch (e: Exception) {
+                logger.error(
+                    "meet exception when process module [${module.name}] with [$annotationFqn]!",
+                    e,
+                )
+                emptyList()
+            }
         }
-        executor.execute {
+        if (allFiles.isNotEmpty()) executor.execute {
             generated.forEach { if (it.exists()) it.delete() }
             createFiles(module, allFiles, singleApt) {
                 generated = it
