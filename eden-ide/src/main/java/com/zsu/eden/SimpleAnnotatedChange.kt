@@ -32,8 +32,11 @@ abstract class SimpleAnnotatedChange(private val shortNames: Collection<String>)
         onChange(event.element)
     }
 
+    @Volatile
+    protected var shouldCheck = true
     private fun onChange(element: PsiElement?) {
         element ?: return
+        if (!shouldCheck) return
         // Checking its 3 parent nodes, not checking too much here, because of performance loss concerns
         for (ktDeclaration in element.parentsOfType<KtDeclaration>().take(3)) {
             val annotations = ktDeclaration.annotationEntries

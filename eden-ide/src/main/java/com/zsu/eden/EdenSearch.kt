@@ -16,26 +16,30 @@ import org.jetbrains.kotlin.psi.KtAnnotationEntry
 import org.jetbrains.kotlin.psi.KtNamedDeclaration
 
 object EdenSearch {
-    private fun getAnnotation(project: Project, annotationFQN: String): PsiClass? {
-        return JavaPsiFacade.getInstance(project)
-            .findClass(annotationFQN, GlobalSearchScope.allScope(project))
+    private fun getAnnotation(
+        project: Project, annotationFQN: String, scope: GlobalSearchScope
+    ): PsiClass? {
+        return JavaPsiFacade.getInstance(project).findClass(annotationFQN, scope)
     }
 
     fun getAnnotatedElements(
         module: Module, annotationFqn: String,
     ): List<KtNamedDeclaration> = buildList {
-        search(module.project, annotationFqn, module.moduleScope) {
+        search(module.project, annotationFqn, module) {
             add(it)
         }
     }
 
     // Copied some from com.android.tools.idea.dagger.DaggerAnnotatedElementsSearch
     private inline fun search(
-        project: Project, annotationFQN: String, scope: SearchScope,
+        project: Project, annotationFQN: String, module: Module,
         kotlinProcessor: (KtNamedDeclaration) -> Unit,
     ) {
-        val annotationClass = getAnnotation(project, annotationFQN) ?: return
-        val candidates = getKotlinAnnotationCandidates(annotationClass, scope)
+        val annotationClass = getAnnotation(
+            project, annotationFQN,
+            module.getModuleWithDependenciesAndLibrariesScope(false),
+        ) ?: return
+        val candidates = getKotlinAnnotationCandidates(annotationClass, module.moduleScope)
         candidates.filterIsInstance<KtAnnotationEntry>().forEach { annotation ->
             val declaration =
                 PsiTreeUtil.getParentOfType(annotation, KtNamedDeclaration::class.java)

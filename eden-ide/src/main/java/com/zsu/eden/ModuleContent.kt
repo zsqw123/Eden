@@ -43,18 +43,16 @@ internal class ModuleContent(private val module: Module) : Disposable {
 
     private inner class ChangeListener : SimpleAnnotatedChange(allAptSimple) {
         private var lastChanged = 0L
-        private var shouldBeChanged = false
         override fun onAnnotatedElementChange(declaration: KtDeclaration) {
-            if (shouldBeChanged) return
             if (PsiSearchScopeUtil.isInScope(scope, declaration)) {
                 val current = System.currentTimeMillis()
                 val timeAfterLastChanged = (current - lastChanged).coerceAtLeast(0)
                 if (timeAfterLastChanged < 1500) {
-                    shouldBeChanged = true
+                    shouldCheck = false
                     thread {
                         Thread.sleep(1500 - timeAfterLastChanged)
                         lastChanged = System.currentTimeMillis()
-                        shouldBeChanged = false
+                        shouldCheck = true
                         tracker.incModificationCount()
                     }
                 } else {

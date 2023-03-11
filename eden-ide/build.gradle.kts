@@ -18,7 +18,7 @@ intellij {
     version.set("2022.1") // target version
     type.set("IC")
     updateSinceUntilBuild.set(false)
-    plugins.set(listOf("com.intellij.java", "org.jetbrains.kotlin"))
+    plugins.set(listOf("com.intellij.java", "org.jetbrains.kotlin", "gradle"))
 }
 
 tasks {
