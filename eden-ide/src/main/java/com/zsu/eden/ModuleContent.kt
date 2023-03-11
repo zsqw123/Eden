@@ -4,6 +4,7 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.util.SimpleModificationTracker
 import com.intellij.psi.PsiManager
+import com.intellij.psi.PsiTreeChangeListener
 import com.intellij.psi.search.PsiSearchScopeUtil
 import com.intellij.psi.util.CachedValue
 import org.jetbrains.kotlin.idea.util.cachedValue
@@ -15,22 +16,37 @@ internal class ModuleContent(private val module: Module) : Disposable {
     private val scope = module.moduleScope
     private val annotatedCache = HashMap<String, ModuleAnnotatedHolder>()
     private val edenService = EdenService.getInstance(project)
-    private val allAptFqn = edenService.allApt.keys
-    private val allAptSimple = allAptFqn.map { it.substringAfterLast('.') }
-        .filter { it.isNotBlank() }
+    private val availableApt = edenService.allApt.filter { it.value.checkEnable(module) }
+
+    private val allAptFqn: Collection<String>
+    private val allAptSimple: Collection<String>
 
     init {
-        allAptFqn.forEach {
-            annotatedCache[it] = ModuleAnnotatedHolder(module, it)
+        if (availableApt.isNotEmpty()) {
+            allAptFqn = availableApt.keys
+            allAptSimple = allAptFqn.map { it.substringAfterLast('.') }
+                .filter { it.isNotBlank() }
+            allAptFqn.forEach {
+                annotatedCache[it] = ModuleAnnotatedHolder(module, it)
+            }
+        } else {
+            allAptFqn = emptyList()
+            allAptSimple = emptyList()
         }
     }
 
-    private val psiManager = PsiManager.getInstance(project)
     private val tracker = SimpleModificationTracker()
-    private val changeListener = ChangeListener()
+    private val psiManager = PsiManager.getInstance(project)
+
+    private val changeListener: PsiTreeChangeListener?
 
     init {
-        psiManager.addPsiTreeChangeListener(changeListener, this)
+        if (availableApt.isNotEmpty()) {
+            changeListener = ChangeListener()
+            psiManager.addPsiTreeChangeListener(changeListener, this)
+        } else {
+            changeListener = null
+        }
     }
 
     val cached: CachedValue<*> = cachedValue(project, tracker) {
@@ -38,27 +54,28 @@ internal class ModuleContent(private val module: Module) : Disposable {
     }
 
     override fun dispose() {
-        psiManager.removePsiTreeChangeListener(changeListener)
+        if (changeListener != null) {
+            psiManager.removePsiTreeChangeListener(changeListener)
+        }
     }
 
     private inner class ChangeListener : SimpleAnnotatedChange(allAptSimple) {
         private var lastChanged = 0L
         override fun onAnnotatedElementChange(declaration: KtDeclaration) {
-            if (PsiSearchScopeUtil.isInScope(scope, declaration)) {
-                val current = System.currentTimeMillis()
-                val timeAfterLastChanged = (current - lastChanged).coerceAtLeast(0)
-                if (timeAfterLastChanged < 1500) {
-                    shouldCheck = false
-                    thread {
-                        Thread.sleep(1500 - timeAfterLastChanged)
-                        lastChanged = System.currentTimeMillis()
-                        shouldCheck = true
-                        tracker.incModificationCount()
-                    }
-                } else {
+            if (!PsiSearchScopeUtil.isInScope(scope, declaration)) return
+            val current = System.currentTimeMillis()
+            val timeAfterLastChanged = (current - lastChanged).coerceAtLeast(0)
+            if (timeAfterLastChanged < 1500) {
+                shouldCheck = false
+                thread {
+                    Thread.sleep(1500 - timeAfterLastChanged)
                     lastChanged = System.currentTimeMillis()
+                    shouldCheck = true
                     tracker.incModificationCount()
                 }
+            } else {
+                lastChanged = System.currentTimeMillis()
+                tracker.incModificationCount()
             }
         }
     }

@@ -3,11 +3,14 @@ package com.zsu.eden
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.rootManager
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtilCore
+import com.intellij.openapi.vfs.VirtualFile
 import com.squareup.kotlinpoet.FileSpec
 import org.jetbrains.jps.model.java.JavaSourceRootType
 import org.jetbrains.jps.model.module.JpsModuleSourceRootType
 import org.jetbrains.kotlin.config.SourceKotlinRootType
+import org.jetbrains.kotlin.idea.configuration.externalProjectPath
 import org.jetbrains.kotlin.idea.util.application.runReadAction
 import java.io.File
 import java.util.concurrent.Executors
@@ -70,6 +73,19 @@ internal class ModuleAnnotatedHolder(
             }
             addedCallback(added)
             sourceRoot.refresh(true, true)
+        }
+
+        private fun guessKspPath(apt: EdenApt, module: Module): VirtualFile? {
+            val sourceRoot = apt.getGeneratePath(module)
+            if (sourceRoot != null) return sourceRoot
+
+            val extProjectPath = module.externalProjectPath
+            if (extProjectPath != null) {
+                val file = File(extProjectPath, "build/generated/ksp/${apt.variant}/kotlin")
+                if (!file.exists()) file.mkdirs()
+                return LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file)
+            }
+            return module.rootManager.getSourceRoots(kotlinSourceRoots).firstOrNull()
         }
     }
 }
