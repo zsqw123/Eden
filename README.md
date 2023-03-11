@@ -24,7 +24,7 @@ annotations.
 ### 1. Add Dependencies
 
 maven-central release
-version: [![Maven Central](https://img.shields.io/maven-central/v/io.github.zsqw123/eden-idea)](https://search.maven.org/artifact/io.github.zsqw123/eden-idea)
+version: [![Maven Central](https://img.shields.io/maven-central/v/io.github.zsqw123/eden-idea)](https://central.sonatype.com/search?q=eden-idea)
 
 ```groovy
 repositories {
