@@ -3,6 +3,7 @@ package com.zsu.eden
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.psi.search.GlobalSearchScope
@@ -40,12 +41,16 @@ class EdenModuleCache(private val project: Project) {
     private var loading = false
     fun tryLoadCache(scope: GlobalSearchScope) {
         if (loading) return
-        loading = true
-        for ((k, v) in moduleMap) {
-            if (!scope.isSearchInModuleContent(k)) continue
-            v.cached.value
+        if (DumbService.isDumb(project)) return
+        try {
+            loading = true
+            for ((k, v) in moduleMap) {
+                if (!scope.isSearchInModuleContent(k)) continue
+                v.cached.value
+            }
+        } finally {
+            loading = false
         }
-        loading = false
     }
 
     companion object {

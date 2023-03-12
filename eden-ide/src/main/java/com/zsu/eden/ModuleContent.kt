@@ -2,6 +2,7 @@ package com.zsu.eden
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.util.SimpleModificationTracker
 import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiTreeChangeListener
@@ -49,7 +50,10 @@ internal class ModuleContent(private val module: Module) : Disposable {
         }
     }
 
-    val cached: CachedValue<*> = cachedValue(project, tracker) {
+    val cached: CachedValue<*> = cachedValue(
+        project, tracker,
+        DumbService.getInstance(project).modificationTracker,
+    ) {
         annotatedCache.values.forEach { it.create() }
     }
 

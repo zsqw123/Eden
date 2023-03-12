@@ -32,7 +32,7 @@ internal class ModuleAnnotatedHolder(
             try {
                 singleApt.processSingleModule(all)
             } catch (e: Exception) {
-                logger.error(
+                logger.logErrorIfNeeded(
                     "meet exception when process module [${module.name}] with [$annotationFqn]!",
                     e,
                 )
