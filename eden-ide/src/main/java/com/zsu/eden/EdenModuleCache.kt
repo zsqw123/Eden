@@ -11,8 +11,12 @@ import com.intellij.psi.search.GlobalSearchScope
 @Service
 class EdenModuleCache(private val project: Project) {
     private val moduleMap: HashMap<Module, ModuleContent> = hashMapOf()
+    private val enabled = EdenService.getInstance(project).allApt.values.any {
+        it.checkEnable(project)
+    }
 
     internal fun addModule(module: Module) {
+        if (!enabled) return
         moduleMap[module] = ModuleContent(module)
     }
 

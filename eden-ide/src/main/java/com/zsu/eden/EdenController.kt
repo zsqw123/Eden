@@ -3,11 +3,12 @@ package com.zsu.eden
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.openapi.project.Project
 
 @Service
-class Regenerator(private val project: Project) {
+class EdenController(private val project: Project) {
     private val moduleCache = EdenModuleCache.getInstance(project)
 
     /**
@@ -39,12 +40,38 @@ class Regenerator(private val project: Project) {
         }
     }
 
+    /**
+     * It is **strongly not recommended** to generate the entire project, as it can be quite time-consuming
+     */
+    fun manualGenerate(
+        scope: Scope,
+        fqns: List<String>? = null,
+    ): Boolean {
+        when (scope) {
+            Scope.CURRENT_MODULE -> {
+                val selectedFile = FileEditorManager.getInstance(project).selectedFiles
+                    .firstOrNull() ?: return false
+                val currentModule = ModuleUtilCore.findModuleForFile(selectedFile, project)
+                    ?: return false
+                ModuleContent(currentModule).refresh(fqns, false)
+                return true
+            }
+
+            Scope.PROJECT -> {
+                ModuleManager.getInstance(project).modules.forEach {
+                    ModuleContent(it).refresh(fqns, false)
+                }
+                return true
+            }
+        }
+    }
+
     enum class Scope {
         CURRENT_MODULE, // refresh selected file's project
         PROJECT, // refresh whole project
     }
 
     companion object {
-        fun getInstance(project: Project) = project.service<Regenerator>()
+        fun getInstance(project: Project) = project.service<EdenController>()
     }
 }

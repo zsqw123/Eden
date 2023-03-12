@@ -12,12 +12,19 @@ import org.jetbrains.kotlin.idea.util.cachedValue
 import org.jetbrains.kotlin.psi.KtDeclaration
 import kotlin.concurrent.thread
 
-internal class ModuleContent(private val module: Module) : Disposable {
+internal class ModuleContent(
+    private val module: Module,
+    private val enabledFqns: List<String>? = null,
+) : Disposable {
     private val project = module.project
     private val scope = module.moduleScope
     private val annotatedCache = HashMap<String, ModuleAnnotatedHolder>()
     private val edenService = EdenService.getInstance(project)
-    private val availableApt = edenService.allApt.filter { it.value.checkEnable(module) }
+    private val availableApt: Map<String, EdenApt> = if (enabledFqns == null) {
+        edenService.allApt.filter { it.value.checkEnable(module) }
+    } else {
+        edenService.allApt.filter { it.key in enabledFqns }
+    }
 
     private val allAptFqn: Collection<String>
     private val allAptSimple: Collection<String>

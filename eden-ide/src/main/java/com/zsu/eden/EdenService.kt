@@ -32,6 +32,8 @@ abstract class EdenApt {
     abstract fun processSingleModule(all: List<KtNamedDeclaration>): List<EdenFile>
 
     open fun getGeneratePath(module: Module): VirtualFile? = null
+
+    open fun checkEnable(project: Project): Boolean = true
     open fun checkEnable(module: Module): Boolean = true
     open val kspVariant: String = "main"
 
