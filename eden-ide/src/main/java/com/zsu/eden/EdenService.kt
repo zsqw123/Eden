@@ -65,8 +65,9 @@ interface EdenFile {
                     outputDirectory = outputDirectory.resolve(packageComponent)
                 }
             }
-            val outputPath = outputDirectory.resolve("${name}.kt")
-            outputPath.toFile().writeText(content())
+            val outputFolder = outputDirectory.toFile()
+            if (!outputFolder.exists()) outputFolder.mkdirs()
+            File(outputFolder, "$name.kt").writeText(content())
         }
     }
 }
