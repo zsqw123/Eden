@@ -7,7 +7,7 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.21")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.20")
         classpath("org.jetbrains.intellij.plugins:gradle-intellij-plugin:1.5.2")
         classpath("com.vanniktech:gradle-maven-publish-plugin:0.20.0")
     }
