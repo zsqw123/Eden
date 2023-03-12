@@ -6,7 +6,6 @@ import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
-import com.squareup.kotlinpoet.FileSpec
 import org.jetbrains.jps.model.java.JavaSourceRootType
 import org.jetbrains.jps.model.module.JpsModuleSourceRootType
 import org.jetbrains.kotlin.config.SourceKotlinRootType
@@ -59,7 +58,7 @@ internal class ModuleAnnotatedHolder(
 
         private val executor = Executors.newSingleThreadExecutor()
         private inline fun createFiles(
-            module: Module, allFiles: List<FileSpec>, apt: EdenApt,
+            module: Module, allFiles: List<EdenFile>, apt: EdenApt,
             addedCallback: (added: List<File>) -> Unit,
         ) {
             if (allFiles.isEmpty()) return

@@ -6,8 +6,8 @@ import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import com.squareup.kotlinpoet.FileSpec
 import org.jetbrains.kotlin.psi.KtNamedDeclaration
+import java.io.File
 
 @Service
 class EdenService(private val project: Project) {
@@ -29,7 +29,7 @@ class EdenService(private val project: Project) {
 
 abstract class EdenApt {
     abstract val annotationFqn: String
-    abstract fun processSingleModule(all: List<KtNamedDeclaration>): List<FileSpec>
+    abstract fun processSingleModule(all: List<KtNamedDeclaration>): List<EdenFile>
 
     open fun getGeneratePath(module: Module): VirtualFile? = null
     open fun checkEnable(module: Module): Boolean = true
@@ -41,5 +41,32 @@ abstract class EdenApt {
             ExtensionPointName.create("com.zsu.eden.edenApt")
 
         fun getAll(): Array<EdenApt> = EP_NAME.extensions
+    }
+}
+
+interface EdenFile {
+    val packageName: String
+    val name: String // without `.kt`
+
+    /** @param ioFile sourceRoot of this file */
+    fun writeTo(ioFile: File)
+
+    abstract class Impl(
+        override val packageName: String,
+        override val name: String,
+    ) : EdenFile {
+        abstract fun content(): String
+        override fun writeTo(ioFile: File) {
+            val packageName = packageName
+            var outputDirectory = ioFile.toPath()
+            if (packageName.isNotEmpty()) {
+                for (packageComponent in packageName.split('.')
+                    .dropLastWhile { it.isEmpty() }) {
+                    outputDirectory = outputDirectory.resolve(packageComponent)
+                }
+            }
+            val outputPath = outputDirectory.resolve("${name}.kt")
+            outputPath.toFile().writeText(content())
+        }
     }
 }

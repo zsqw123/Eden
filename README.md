@@ -32,6 +32,8 @@ repositories {
 }
 dependencies {
     implementation("io.github.zsqw123:eden-idea:$version")
+    // implementation following if kotlin-poet is needed
+    implementation("io.github.zsqw123:eden-poet:$version")
 }
 ```
 
@@ -44,9 +46,9 @@ dependencies {
 ```kotlin
 private const val FAKE_FQN = "com.fake.FakeClass" // the annotation full qualified name
 
-class FakeApt : EdenApt() {
+class FakeApt : EdenPoetApt() {
     override val annotationFqn: String = FAKE_FQN
-    override fun processSingleModule(all: List<KtNamedDeclaration>): List<FileSpec> {
+    override fun processWithPoet(all: List<KtNamedDeclaration>): List<FileSpec> {
         return all.mapNotNull { it.name }.map { name ->
             val className = "Fake${name.capitalizeAsciiOnly()}"
             // generate codes by kotlinpoet
