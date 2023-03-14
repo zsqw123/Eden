@@ -17,6 +17,7 @@ allprojects {
     repositories {
         google()
         maven { setUrl("https://www.jetbrains.com/intellij-repository/releases/") }
+        maven { setUrl("https://www.jetbrains.com/intellij-repository/snapshots") }
         mavenCentral()
     }
     extra["idePath"] = getIdePath()
